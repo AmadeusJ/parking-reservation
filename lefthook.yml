@@ -45,27 +45,50 @@
 
 # 커밋 메시지 템플릿 설정
 prepare-commit-msg:
-  commands:
-    set-template:
-      runner: cp .gitmessage.txt "$1"
+  jobs:
+    - name: set-template
+      run: |
+        TEMPLATE_FILE=".gitmessage.txt"
+        COMMIT_MSG_FILE=".git/COMMIT_EDITMSG"
+
+        if [ -f "$TEMPLATE_FILE" ]; then
+          if ! diff -q "$TEMPLATE_FILE" "$COMMIT_MSG_FILE" > /dev/null 2>&1; then
+            cp "$TEMPLATE_FILE" "$COMMIT_MSG_FILE"
+          else
+            echo "템플릿이 이미 설정되어 있습니다. 복사를 건너뜁니다."
+          fi
+        else
+          echo "❗️ $TEMPLATE_FILE 파일이 없습니다. 템플릿 설정을 건너뜁니다."
+        fi
 
 # 커밋 메시지 검증
 commit-msg:
-  commands:
-    validate-message:
-      runner: |
-        message=$(cat "$1")
-        if ! echo "$message" | grep -Eq "^(feat|fix|docs|style|refactor|test|chore): \[(FE|BE)\] .{1,50} #[0-9]+$"; then
+  jobs:
+    - name: validate-message
+      run: |
+        message=$(cat ".git/COMMIT_EDITMSG")
+        if ! echo "$message" | grep -Eq "^(feat|fix|docs|style|refactor|test|chore): .{1,50} #[0-9]+$"; then
           echo "❌ 커밋 메시지 형식이 올바르지 않습니다."
-          echo "올바른 형식: [타입]: [FE/BE] [제목] [#이슈번호]"
-          echo "예시: feat: [FE] 로그인 페이지 추가 #123"
+          echo "올바른 형식: [타입]: [제목] [#이슈번호]"
+          echo ""
+          echo "예시:"
+          echo "feat: 로그인 페이지 추가 #123"
+          echo "fix: API 응답 오류 수정 #456"
           exit 1
         fi
-
+        echo "✅ 커밋 메시지 형식이 올바릅니다."
 
 # 커밋 전 작업 설정
 pre-commit:
   parallel: true
-  commands:
-    lint-staged:
-      runner: npm run lint-staged
+  jobs:
+    # - name: eslint
+    #   glob: "*.{js,jsx,ts,tsx}"
+    #   run: npx eslint --fix {staged_files}
+
+    # - name: prettier
+    #   glob: "*.{js,jsx,ts,tsx,json,css,md}"
+    #   run: npx prettier --write {staged_files}
+
+    - name: lint-staged
+      run: npx lint-staged
