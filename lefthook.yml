@@ -1,0 +1,71 @@
+# EXAMPLE USAGE:
+#
+#   Refer for explanation to following link:
+#   https://lefthook.dev/configuration/
+#
+# pre-push:
+#   jobs:
+#     - name: packages audit
+#       tags:
+#         - frontend
+#         - security
+#       run: yarn audit
+#
+#     - name: gems audit
+#       tags:
+#         - backend
+#         - security
+#       run: bundle audit
+#
+# pre-commit:
+#   parallel: true
+#   jobs:
+#     - run: yarn eslint {staged_files}
+#       glob: "*.{js,ts,jsx,tsx}"
+#
+#     - name: rubocop
+#       glob: "*.rb"
+#       exclude:
+#         - config/application.rb
+#         - config/routes.rb
+#       run: bundle exec rubocop --force-exclusion {all_files}
+#
+#     - name: govet
+#       files: git ls-files -m
+#       glob: "*.go"
+#       run: go vet {files}
+#
+#     - script: "hello.js"
+#       runner: node
+#
+#     - script: "hello.go"
+#       runner: go run
+
+# Lefthook configuration
+
+# 커밋 메시지 템플릿 설정
+prepare-commit-msg:
+  commands:
+    set-template:
+      runner: cp .gitmessage.txt "$1"
+
+# 커밋 메시지 검증
+commit-msg:
+  commands:
+    validate-message:
+      runner: |
+        message=$(cat "$1")
+        if ! echo "$message" | grep -Eq "^(feat|fix|docs|style|refactor|test|chore): \[(FE|BE)\] .{1,50} #[0-9]+$"; then
+          echo "❌ 커밋 메시지 형식이 올바르지 않습니다."
+          echo "올바른 형식: [타입]: [FE/BE] [제목] [#이슈번호]"
+          echo "예시: feat: [FE] 로그인 페이지 추가 #123"
+          exit 1
+        fi
+
+
+# 커밋 전 작업 설정
+pre-commit:
+  parallel: true
+  commands:
+    lint-staged:
+      runner: npm run lint-staged
