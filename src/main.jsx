@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-
-import App from './App.jsx';
+import App from './App';
+import { GlobalPortalProvider } from './components/GlobalPortal';
+import './index.css';
 
 // 개발 환경에서는 MSW를 사용하여 모킹 설정
 if (process.env.NODE_ENV === 'development') {
@@ -11,6 +12,8 @@ if (process.env.NODE_ENV === 'development') {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <GlobalPortalProvider>
+      <App />
+    </GlobalPortalProvider>
   </React.StrictMode>
 );
