@@ -1,7 +1,6 @@
+import { QueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-
-// API 기본 URL 설정 (환경변수 기반으로 설정 가능)
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+import { API_BASE_URL } from '../config';
 
 // Axios 인스턴스 생성
 const apiClient = axios.create({
@@ -10,6 +9,20 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    throw new Error(
+      error.response?.data?.message || '데이터를 불러오는데 실패했습니다.'
+    );
+  }
+);
+
+// IMPORTANT: QueryClient 인스턴스 생성
+export const queryClient = new QueryClient();
 
 // 주차장 예약 관련 API 함수 정의
 const reservationApi = {

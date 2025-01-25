@@ -14,7 +14,7 @@
  * @param {number} [autoCloseTime=3000] - 모달 자동 닫기 시간 (ms)
  * @returns {JSX.Element} - 확인 모달 요소
  */
-import { PortalConsumer } from '@/components/GlobalPortal';
+import { PortalConsumer } from '@/components/Module/GlobalPortal';
 import { Button } from '@/components/UI/Button';
 import { colors } from '@/constants/colors';
 
@@ -26,7 +26,7 @@ const ConfirmModal = ({
   cancelButtonText = '아니요',
   confirmButtonText = '네',
   description = '모달 내용을 입력해주세요.',
-  subDescription = '주의사항을 입력해주세요.',
+  subDescription = '',
   // autoClose = false,
   // autoCloseTime = 3000,
 }) => {

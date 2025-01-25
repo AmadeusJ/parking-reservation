@@ -6,7 +6,7 @@
  */
 
 import spinner from '@/assets/bouncing-circles.svg';
-import { PortalConsumer } from '@/components/GlobalPortal';
+import { PortalConsumer } from '@/components/Module/GlobalPortal';
 
 const Spinner = ({ isLoading = false }) => {
   // 로딩 상태가 아니면 렌더링하지 않음

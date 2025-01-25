@@ -5,37 +5,49 @@ import { http, HttpResponse } from 'msw';
 const initialParkingSlots = [
   {
     id: 1,
-    type: '일반',
+    type: '여성',
     status: '점유',
     lastUpdated: '2025-01-01T17:55:13+09:00',
   },
   {
     id: 2,
-    type: '일반',
-    status: '비점유',
-    lastUpdated: '2025-01-01T17:55:13+09:00',
-  },
-  {
-    id: 3,
-    type: '전기차',
-    status: '예약',
-    lastUpdated: '2025-01-01T17:55:13+09:00',
-  },
-  {
-    id: 4,
     type: '장애인',
     status: '비점유',
     lastUpdated: '2025-01-01T17:55:13+09:00',
   },
   {
+    id: 3,
+    type: '일반',
+    status: '예약',
+    lastUpdated: '2025-01-01T17:55:13+09:00',
+  },
+  {
+    id: 4,
+    type: '일반',
+    status: '비점유',
+    lastUpdated: '2025-01-01T17:55:13+09:00',
+  },
+  {
     id: 5,
-    type: '여성',
+    type: '일반',
     status: '점유',
     lastUpdated: '2025-01-01T17:55:13+09:00',
   },
   {
     id: 6,
     type: '노약자',
+    status: '비점유',
+    lastUpdated: '2025-01-01T17:55:13+09:00',
+  },
+  {
+    id: 7,
+    type: '전기차',
+    status: '비점유',
+    lastUpdated: '2025-01-01T17:55:13+09:00',
+  },
+  {
+    id: 8,
+    type: '전기차',
     status: '비점유',
     lastUpdated: '2025-01-01T17:55:13+09:00',
   },
@@ -51,7 +63,8 @@ const validateParkingSlotId = (id) => {
   if (typeof id !== 'number' || id <= 0) {
     return 'parkingSlotId must be a positive integer';
   }
-  const slotExists = parkingSlots.get().some((slot) => slot.id === id);
+  const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
+  const slotExists = slots.some((slot) => slot.id === id);
   if (!slotExists) {
     return 'Invalid parkingSlotId: Slot does not exist';
   }
@@ -62,10 +75,8 @@ const validateParkingSlotId = (id) => {
 export const handlers = [
   // 주차장 예약 정보 조회 API
   http.get('/api/parking-reservation', () => {
-    return HttpResponse.json(
-      { parkingSlots: parkingSlots.get() },
-      { status: 200 }
-    );
+    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
+    return HttpResponse.json({ parkingSlots: slots }, { status: 200 });
   }),
 
   // 주차장 예약 생성 API
@@ -82,7 +93,7 @@ export const handlers = [
     }
 
     // 이미 점유된 주차장 확인
-    const slots = parkingSlots.get();
+    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
     const slot = slots.find((slot) => slot.id === parkingSlotId);
     if (slot.status === '점유') {
       return HttpResponse.json(
@@ -94,10 +105,12 @@ export const handlers = [
     // 예약 상태로 변경
     slot.status = '예약';
     slot.lastUpdated = new Date().toISOString();
-    parkingSlots.set(slots);
+    parkingSlots.update((prevSlots) =>
+      prevSlots.map((s) => (s.id === slot.id ? slot : s))
+    );
 
     // 사용자 예약 내역 업데이트
-    const reservations = userReservations.get();
+    const reservations = userReservations.getValue(); // 동기적으로 데이터 가져오기
     reservations.push({
       id: reservations.length + 1,
       parkingLot: parkingLotName,
@@ -105,7 +118,7 @@ export const handlers = [
       created: new Date().toISOString(),
       userId,
     });
-    userReservations.set(reservations);
+    userReservations.update(() => reservations);
 
     return HttpResponse.json(
       { result: true, message: '주차장 예약 성공' },
@@ -127,7 +140,7 @@ export const handlers = [
     }
 
     // 상태 변경 처리
-    const slots = parkingSlots.get();
+    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
     const slot = slots.find((slot) => slot.id === parkingSlotId);
     if (slot.status === '비점유') {
       return HttpResponse.json(
@@ -137,7 +150,9 @@ export const handlers = [
     }
     slot.status = '비점유';
     slot.lastUpdated = new Date().toISOString();
-    parkingSlots.set(slots);
+    parkingSlots.update((prevSlots) =>
+      prevSlots.map((s) => (s.id === slot.id ? slot : s))
+    );
 
     return HttpResponse.json(
       { result: true, message: '주차장 예약 취소 성공' },
@@ -160,7 +175,7 @@ export const handlers = [
     }
 
     // 상태 변경 처리
-    const slots = parkingSlots.get();
+    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
     const preSlot = slots.find((slot) => slot.id === preParkingSlotId);
     const newSlot = slots.find((slot) => slot.id === newParkingSlotId);
 
@@ -182,7 +197,13 @@ export const handlers = [
     newSlot.status = '예약';
     preSlot.lastUpdated = new Date().toISOString();
     newSlot.lastUpdated = new Date().toISOString();
-    parkingSlots.set(slots);
+    parkingSlots.update((prevSlots) =>
+      prevSlots.map((s) => {
+        if (s.id === preSlot.id) return preSlot;
+        if (s.id === newSlot.id) return newSlot;
+        return s;
+      })
+    );
 
     return HttpResponse.json(
       { result: true, message: '주차장 예약 변경 성공' },
@@ -201,7 +222,7 @@ export const handlers = [
     }
 
     const reservations = userReservations
-      .get()
+      .getValue()
       .filter((reservation) => reservation.userId === userId);
 
     return HttpResponse.json(

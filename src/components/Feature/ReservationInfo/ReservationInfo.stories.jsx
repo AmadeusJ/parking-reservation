@@ -1,7 +1,7 @@
 import ReservationInfo from './ReservationInfo';
 
 export default {
-  title: 'Components/ReservationInfo',
+  title: 'Feature/ReservationInfo',
   component: ReservationInfo,
   argTypes: {
     reservation: {

@@ -5,13 +5,11 @@
  * - React Query를 사용하여 데이터 캐싱 및 자동 새로고침 지원
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import reservationApi from '../api/reservation';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import reservationApi, { queryClient } from '../api/reservation';
 import { queryConfig } from '../config'; // 쿼리 설정
 
-export const useReservation = () => {
-  const queryClient = useQueryClient();
-
+export const useReservationQuery = () => {
   // 주차장 상태 조회
   const {
     data: parkingSlots,
@@ -21,6 +19,8 @@ export const useReservation = () => {
   } = useQuery({
     queryKey: ['parkingSlots'],
     queryFn: ({ signal }) => reservationApi.getParkingSlots({ signal }),
+    select: (data) => data.parkingSlots, // 주차장 상태 데이터 선택
+    placeholderData: [], // 데이터를 가져오기 전 사용할 임시 값
     staleTime: queryConfig.parkingSlots.staleTime, // 캐싱 유지 시간
     refetchInterval: queryConfig.parkingSlots.refetchInterval, // 캐싱 갱신 주기
   });
@@ -72,13 +72,14 @@ export const useReservation = () => {
 
   // 나의 예약 목록 조회
   const {
-    data: myReservations,
+    data: myReservations = [],
     error: myReservationsError,
     isError: isMyReservationsError,
     isPending: isMyReservationsPending,
   } = useQuery({
     queryKey: ['myReservations'],
     queryFn: ({ signal }) => reservationApi.getMyReservations({ signal }),
+    placeholderData: [], // 데이터를 가져오기 전 사용할 임시 값
   });
 
   return {
