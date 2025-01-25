@@ -43,6 +43,8 @@ const initialParkingSlots = [
 
 // LiveStorage로 주차 데이터 저장
 const parkingSlots = new LiveStorage('parking-slots', initialParkingSlots);
+const userReservations = new LiveStorage('user-reservations', []);
+const parkingLotName = '해오름'; // 고정값
 
 // 공통 검증 함수
 const validateParkingSlotId = (id) => {
@@ -68,7 +70,7 @@ export const handlers = [
 
   // 주차장 예약 생성 API
   http.post('/api/parking-reservation/create', async ({ json }) => {
-    const { parkingSlotId } = await json();
+    const { parkingSlotId, userId } = await json();
 
     // 공통 검증
     const error = validateParkingSlotId(parkingSlotId);
@@ -93,6 +95,17 @@ export const handlers = [
     slot.status = '예약';
     slot.lastUpdated = new Date().toISOString();
     parkingSlots.set(slots);
+
+    // 사용자 예약 내역 업데이트
+    const reservations = userReservations.get();
+    reservations.push({
+      id: reservations.length + 1,
+      parkingLot: parkingLotName,
+      parkingSlotId,
+      created: new Date().toISOString(),
+      userId,
+    });
+    userReservations.set(reservations);
 
     return HttpResponse.json(
       { result: true, message: '주차장 예약 성공' },
@@ -173,6 +186,26 @@ export const handlers = [
 
     return HttpResponse.json(
       { result: true, message: '주차장 예약 변경 성공' },
+      { status: 200 }
+    );
+  }),
+
+  // 나의 주차내역 조회 API
+  http.get('/api/my-reservation', ({ url }) => {
+    const userId = parseInt(url.searchParams.get('userId'), 10);
+    if (!userId) {
+      return HttpResponse.json(
+        { result: false, message: 'userId is required' },
+        { status: 400 }
+      );
+    }
+
+    const reservations = userReservations
+      .get()
+      .filter((reservation) => reservation.userId === userId);
+
+    return HttpResponse.json(
+      { 'my-parkingSlots': reservations },
       { status: 200 }
     );
   }),
