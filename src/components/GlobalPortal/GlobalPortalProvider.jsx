@@ -1,6 +1,7 @@
 /**
+ * GlobalPortalProvider.jsx
  * 전역 포탈 컴포넌트
- * : 전역적으로 사용되는 모달, 팝업 등을 관리하는 컴포넌트
+ * 전역적으로 사용되는 모달, 팝업 등을 관리하는 컴포넌트
  * @returns {JSX.Element} - 전역 포탈 요소
  */
 import { createContext, useState } from 'react';
