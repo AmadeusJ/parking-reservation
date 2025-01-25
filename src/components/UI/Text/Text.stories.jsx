@@ -40,6 +40,11 @@ export default {
       description: '강조 텍스트 색상',
       defaultValue: { summary: 'primary' },
     },
+    lineBreakFlag: {
+      control: 'text',
+      description: '줄바꿈 플래그',
+      defaultValue: { summary: '<br/>' },
+    },
   },
   args: {
     fontSize: '22px',
@@ -48,6 +53,7 @@ export default {
     children: '텍스트',
     highlight: ['텍스트'],
     highlightColor: 'primary',
+    lineBreakFlag: '<br/>',
   },
 };
 
