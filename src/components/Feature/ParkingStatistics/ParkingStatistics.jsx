@@ -8,6 +8,7 @@ import { colors } from '@/constants/colors';
 import { memo, useEffect, useState } from 'react';
 const ParkingStatistics = ({ statistics }) => {
   const [availableColor, setAvailableColor] = useState(colors.gray);
+  const { availableSlots, totalSlots, typeCounts } = statistics;
 
   useEffect(() => {
     let availableColor = availableSlots > 0 ? 'unoccupied' : 'gray';
@@ -16,9 +17,6 @@ const ParkingStatistics = ({ statistics }) => {
 
   // 통계 데이터가 없으면 반환하지 않음
   if (!statistics) return null;
-
-  // 주차장 통계 정보 표시
-  const { availableSlots, totalSlots, typeCounts } = statistics;
 
   // 주차장 통계 정보 표시
   return (
