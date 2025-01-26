@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom';
 import NotFound from '../pages/404';
 import MainPage from '../pages/MainPage';
 import ReservationPage from '../pages/reservation/ReservationPage';
-import ReservationResultPage from '../pages/reservation/ReservationResultPage';
 import RootLayout from '../pages/RootLayout';
 import MyPage from '../pages/user/MyPage';
 
@@ -21,11 +20,6 @@ const router = createBrowserRouter([
       {
         path: '/reservation',
         element: <ReservationPage />,
-      },
-      // 예약 결과 페이지 - [page03]
-      {
-        path: '/reservation/result',
-        element: <ReservationResultPage />,
       },
       // 마이 페이지 - [page04]
       {
