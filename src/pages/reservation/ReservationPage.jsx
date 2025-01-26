@@ -3,8 +3,8 @@ import { Button } from '../../components/UI/Button';
 import { ConfirmModal } from '../../components/UI/ConfirmModal';
 import { Spinner } from '../../components/UI/Spinner';
 import { Text } from '../../components/UI/Text';
-import useReservationHandler from '../../hooks/useReservationHandler';
-import { useReservationQuery } from '../../hooks/useReservationQuery';
+import useReservationHandler from '../../hooks/handler/useReservationHandler';
+import useCreateReservationQuery from '../../hooks/query/useCreateReservationQuery';
 
 export default function ReservationPage() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function ReservationPage() {
   // 선택된 주차면 데이터
   const { slot } = location.state;
   // 예약 생성 API 호출 함수
-  const { createReservation } = useReservationQuery();
+  const { createReservation } = useCreateReservationQuery();
   // 예약 처리 로직 관리 커스텀 훅
   const { guideSentence, isConfirmed, handleReservation, isLoading } =
     useReservationHandler(createReservation);

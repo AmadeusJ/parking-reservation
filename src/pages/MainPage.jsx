@@ -12,10 +12,10 @@ import { ConfirmModal } from '../components/UI/ConfirmModal';
 import { Spinner } from '../components/UI/Spinner';
 import { Text } from '../components/UI/Text';
 import { colors } from '../constants/colors';
-import useParkingLotMap from '../hooks/useParkingLotMap';
-import useParkingStatistics from '../hooks/useParkingStatistics';
-import { useReservationQuery } from '../hooks/useReservationQuery';
-import useSlotClickHandler from '../hooks/useSlotClickHandler';
+import useParkingLotMapHandler from '../hooks/handler/useParkingLotMapHandler';
+import useParkingStatisticsHandler from '../hooks/handler/useParkingStatisticsHandler';
+import useSlotClickHandler from '../hooks/handler/useSlotClickHandler';
+import useGetParkingLotQuery from '../hooks/query/useGetParkingLotQuery';
 
 export default function MainPage() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function MainPage() {
     isParkingSlotsPending,
     isParkingSlotsError,
     parkingSlotsError,
-  } = useReservationQuery();
+  } = useGetParkingLotQuery();
 
   // 주차장 지도 컴포넌트 참조
   const parkingLotMapRef = useRef(null);
@@ -41,10 +41,10 @@ export default function MainPage() {
   } = useSlotClickHandler(navigate);
 
   // 주차장 지도 스타일링
-  useParkingLotMap(parkingLotMapRef, parkingSlots, handleSlotClick);
+  useParkingLotMapHandler(parkingLotMapRef, parkingSlots, handleSlotClick);
 
   // 주차장 통계 정보 계산
-  const statistics = useParkingStatistics(parkingSlots);
+  const statistics = useParkingStatisticsHandler(parkingSlots);
 
   // 주차장 상태 조회 로딩 중일 때 스피너 표시
   if (isParkingSlotsPending) {

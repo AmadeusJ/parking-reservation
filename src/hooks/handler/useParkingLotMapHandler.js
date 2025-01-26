@@ -13,7 +13,11 @@ import { useEffect, useMemo } from 'react';
  * @param {Array} parkingSlots - 주차장 상태 데이터 (id, status 포함)
  * @param {Function} onSlotClick - 슬롯 클릭 시 호출되는 콜백 함수
  */
-const useParkingLotMap = (svgContainerRef, parkingSlots, onSlotClick) => {
+export default function useParkingLotMapHandler(
+  svgContainerRef,
+  parkingSlots,
+  onSlotClick
+) {
   // 주차장 슬롯의 ID와 상태를 기반으로 스타일링 데이터를 계산 (Memoization)
   const slotStyles = useMemo(() => {
     if (!Array.isArray(parkingSlots)) return [];
@@ -87,6 +91,4 @@ const useParkingLotMap = (svgContainerRef, parkingSlots, onSlotClick) => {
       }
     }
   }, [svgContainerRef, parkingSlots, slotStyles, onSlotClick]); // slotStyles가 변경될 때만 실행
-};
-
-export default useParkingLotMap;
+}

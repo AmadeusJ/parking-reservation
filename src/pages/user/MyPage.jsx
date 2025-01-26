@@ -9,7 +9,7 @@ import { ReservationInfo } from '../../components/Feature/ReservationInfo';
 import { Button } from '../../components/UI/Button';
 import { Spinner } from '../../components/UI/Spinner';
 import { Text } from '../../components/UI/Text';
-import { useGetMyReservation } from '../../hooks/query/useGetMyReservation';
+import { useGetMyReservationQuery } from '../../hooks/query/useGetMyReservationQuery';
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function MyPage() {
     isMyReservationsPending,
     isMyReservationsError,
     myReservationsError,
-  } = useGetMyReservation(user.id);
+  } = useGetMyReservationQuery(user.id);
 
   // 로딩 상태일 경우
   if (isMyReservationsPending) {
@@ -56,7 +56,7 @@ export default function MyPage() {
         }}
       >
         <Text fontSize="35px" fontWeight="bold">
-          {`${user.name} 님의 예약`}
+          {`"${user.name}"님의 예약 현황을 알려드릴께요.`}
         </Text>
       </div>
 
@@ -69,17 +69,30 @@ export default function MyPage() {
       {/* 나의 예약 목록이 없을 경우 */}
       {myReservations.length === 0 && (
         <>
-          <Text
-            fontSize="20px"
-            fontWeight="bold"
-            highlight={[
-              '예약하신 내역이 없어요.',
-              '예약 화면에서 예약을 진행해주세요.',
-            ]}
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '70px',
+            }}
           >
-            {`예약하신 내역이 없어요.<br/>예약 화면에서 예약을 진행해주세요.`}
-          </Text>
-          <Button onClick={() => navigate('/')}>예약하기</Button>
+            <Text
+              fontSize="25px"
+              fontWeight="bold"
+              highlight={[
+                '예약하신 내역이 없어요.',
+                '예약 화면에서 예약을 진행해주세요.',
+              ]}
+            >
+              {`예약하신 내역이 없어요.<br/>예약 화면에서 예약을 진행해주세요.`}
+            </Text>
+          </div>
+          <div>
+            <Button onClick={() => navigate('/')}>예약하기</Button>
+          </div>
         </>
       )}
     </div>

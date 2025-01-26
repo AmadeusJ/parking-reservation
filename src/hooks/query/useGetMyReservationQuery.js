@@ -6,7 +6,11 @@
 import { useQuery } from '@tanstack/react-query';
 import reservationApi from '../../api/reservation';
 
-export const useGetMyReservation = (userId) => {
+/**
+ * @param {userId} - 예약 목록을 조회할 사용자 ID
+ * @returns {Object} - 나의 예약 목록, 예약 목록 조회 상태, 예약 목록 조회 오류 상태, 예약 목록 조회 오류
+ */
+export const useGetMyReservationQuery = (userId) => {
   const {
     data: myReservations,
     isPending: isMyReservationsPending,
