@@ -12,13 +12,15 @@ import reservationApi, { queryClient } from '../../api/reservation';
  */
 export default function useCreateReservationQuery() {
   const {
-    mutate: createReservation,
+    mutateAsync: createReservation,
     isPending: isCreatingReservation,
     isError: isCreatingReservationError,
     error: createReservationError,
   } = useMutation({
-    mutationFn: (parkingSlotId) =>
-      reservationApi.createReservation(parkingSlotId),
+    mutationFn: async (parkingSlotId) => {
+      const response = await reservationApi.createReservation(parkingSlotId);
+      return response;
+    },
     onSuccess: () => {
       // 예약 생성 성공 시 주차장 상태 조회 데이터 자동 갱신
       queryClient.invalidateQueries({ queryKey: ['parkingSlots'] });

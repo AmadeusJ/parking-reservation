@@ -2,6 +2,7 @@
  * ReservationPage.jsx
  * 예약 페이지
  */
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import getActionButtons from '../../components/Module/getActionButtons';
 import { ConfirmModal } from '../../components/UI/ConfirmModal';
@@ -14,20 +15,21 @@ import getActionMessage from '../../utils/getActionMessage';
 export default function ReservationPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const userId = useSelector((state) => state.user.id); // 유저 아이디
   // 선택된 주차면 데이터
   const { slot, action } = location.state;
   // 예약 생성 API 호출 함수
   const { createReservation } = useCreateReservationQuery();
   // 예약 처리 로직 관리 커스텀 훅
   const { resultMessage, isConfirmed, handleReservation, isLoading } =
-    useReservationHandler(createReservation);
+    useReservationHandler(createReservation, userId);
   // 예약 취소 API 호출 함수
   const {
     cancelReservation,
     isCancelingReservation,
     isCancelingReservationError,
     isCancelingReservationSuccess,
-  } = useCancleReservationQuery();
+  } = useCancleReservationQuery(userId);
   // 선택된 주차면 데이터가 없을 경우
   if (!slot) {
     return (

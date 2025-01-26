@@ -10,15 +10,11 @@ export default function getActionButtons({
   action,
   isConfirmed,
   isCancelingReservationSuccess,
-  isCancelingReservationError,
   handleReservation,
   cancelReservation,
   navigate,
   slot,
 }) {
-  console.log('isConfirmed', isConfirmed);
-  console.log('isCancelingReservationSuccess', isCancelingReservationSuccess);
-  console.log('isCancelingReservationError', isCancelingReservationError);
   if (isConfirmed || isCancelingReservationSuccess) {
     // 처리 완료 후 확인 버튼
     return [

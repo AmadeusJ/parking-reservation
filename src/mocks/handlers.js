@@ -53,10 +53,33 @@ const initialParkingSlots = [
   },
 ];
 
+// 나의 예약내역 초기 데이터
+const initialUserReservations = [
+  {
+    id: 1,
+    parkingLot: '해오름',
+    parkingSlotId: 3,
+    created: '2025-01-01T17:55:13+09:00',
+    userId: 1,
+  },
+];
+
 // LiveStorage로 주차 데이터 저장
 const parkingSlots = new LiveStorage('parking-slots', initialParkingSlots);
-const userReservations = new LiveStorage('user-reservations', []);
+const userReservations = new LiveStorage(
+  'user-reservations',
+  initialUserReservations
+);
 const parkingLotName = '해오름'; // 고정값
+
+// 초기화 함수
+const initializeStorages = () => {
+  parkingSlots.update(() => initialParkingSlots);
+  userReservations.update(() => initialUserReservations);
+};
+
+// 앱 시작 시 실행
+initializeStorages();
 
 // 공통 검증 함수
 const validateParkingSlotId = (id) => {
@@ -80,8 +103,8 @@ export const handlers = [
   }),
 
   // 주차장 예약 생성 API
-  http.post('/api/parking-reservation/create', async ({ json }) => {
-    const { parkingSlotId, userId } = await json();
+  http.post('/api/parking-reservation/create', async ({ request }) => {
+    const { parkingSlotId } = await request.json();
 
     // 공통 검증
     const error = validateParkingSlotId(parkingSlotId);
@@ -116,7 +139,6 @@ export const handlers = [
       parkingLot: parkingLotName,
       parkingSlotId,
       created: new Date().toISOString(),
-      userId,
     });
     userReservations.update(() => reservations);
 
@@ -127,10 +149,16 @@ export const handlers = [
   }),
 
   // 주차장 예약 취소 API
-  http.delete('/api/parking-reservation/cancel', async ({ json }) => {
-    const { parkingSlotId } = await json();
+  http.delete('/api/parking-reservation/cancel', async ({ request }) => {
+    const { parkingSlotId, userId } = await request.json();
 
-    // 공통 검증
+    // 공통 검증: userId와 parkingSlotId 유효성 확인
+    if (!userId || typeof userId !== 'number') {
+      return HttpResponse.json(
+        { result: false, message: 'Invalid or missing userId' },
+        { status: 400 }
+      );
+    }
     const error = validateParkingSlotId(parkingSlotId);
     if (error) {
       return HttpResponse.json(
@@ -139,8 +167,22 @@ export const handlers = [
       );
     }
 
+    // 사용자 예약 내역에서 parkingSlotId 확인
+    // const reservations = userReservations.getValue();
+    // const userReservation = reservations.find(
+    //   (reservation) =>
+    //     reservation.parkingSlotId === parkingSlotId
+    //     // reservation.userId === userId && reservation.parkingSlotId === parkingSlotId
+    // );
+    // if (!userReservation) {
+    //   return HttpResponse.json(
+    //     { result: false, message: 'No reservation found for this user and slot' },
+    //     { status: 404 }
+    //   );
+    // }
+
     // 상태 변경 처리
-    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
+    const slots = parkingSlots.getValue();
     const slot = slots.find((slot) => slot.id === parkingSlotId);
     if (slot.status === '비점유') {
       return HttpResponse.json(
@@ -148,10 +190,20 @@ export const handlers = [
         { status: 400 }
       );
     }
+
+    // 슬롯 상태를 비점유로 변경
     slot.status = '비점유';
     slot.lastUpdated = new Date().toISOString();
     parkingSlots.update((prevSlots) =>
       prevSlots.map((s) => (s.id === slot.id ? slot : s))
+    );
+
+    // 사용자 예약 내역에서 해당 예약 삭제
+    userReservations.update((prevReservations) =>
+      prevReservations.filter(
+        (reservation) => !(reservation.parkingSlotId === parkingSlotId)
+        // !(reservation.userId === userId && reservation.parkingSlotId === parkingSlotId)
+      )
     );
 
     return HttpResponse.json(
@@ -160,70 +212,22 @@ export const handlers = [
     );
   }),
 
-  // 주차장 예약 변경 API
-  http.put('/api/parking-reservation/change', async ({ json }) => {
-    const { preParkingSlotId, newParkingSlotId } = await json();
-
-    // 공통 검증
-    const error1 = validateParkingSlotId(preParkingSlotId);
-    const error2 = validateParkingSlotId(newParkingSlotId);
-    if (error1 || error2) {
-      return HttpResponse.json(
-        { result: false, message: error1 || error2 },
-        { status: 400 }
-      );
-    }
-
-    // 상태 변경 처리
-    const slots = parkingSlots.getValue(); // 동기적으로 데이터 가져오기
-    const preSlot = slots.find((slot) => slot.id === preParkingSlotId);
-    const newSlot = slots.find((slot) => slot.id === newParkingSlotId);
-
-    if (preSlot.status !== '예약') {
-      return HttpResponse.json(
-        { result: false, message: '현재 주차장이 예약 상태가 아닙니다.' },
-        { status: 400 }
-      );
-    }
-    if (newSlot.status !== '비점유') {
-      return HttpResponse.json(
-        { result: false, message: '새 주차장이 비점유 상태가 아닙니다.' },
-        { status: 400 }
-      );
-    }
-
-    // 예약 변경 처리
-    preSlot.status = '비점유';
-    newSlot.status = '예약';
-    preSlot.lastUpdated = new Date().toISOString();
-    newSlot.lastUpdated = new Date().toISOString();
-    parkingSlots.update((prevSlots) =>
-      prevSlots.map((s) => {
-        if (s.id === preSlot.id) return preSlot;
-        if (s.id === newSlot.id) return newSlot;
-        return s;
-      })
-    );
-
-    return HttpResponse.json(
-      { result: true, message: '주차장 예약 변경 성공' },
-      { status: 200 }
-    );
-  }),
-
   // 나의 주차내역 조회 API
-  http.get('/api/my-reservation/:userId', ({ params }) => {
-    const userId = parseInt(params.userId, 10);
-    if (!userId) {
-      return HttpResponse.json(
-        { result: false, message: 'userId is required' },
-        { status: 400 }
-      );
-    }
+  // http.get('/api/my-reservation/:userId', ({ params }) => {
+  http.get('/api/my-reservation/:userId', () => {
+    // const userId = parseInt(params.userId, 10);
+    // if (!userId) {
+    //   return HttpResponse.json(
+    //     { result: false, message: 'userId is required' },
+    //     { status: 400 }
+    //   );
+    // }
 
-    const reservations = userReservations
-      .getValue()
-      .filter((reservation) => reservation.userId === userId);
+    const reservations = userReservations.getValue();
+    // .filter((reservation) => {
+    //   console.log(reservation, userId);
+    //   return reservation.userId === userId;
+    // });
 
     return HttpResponse.json({ data: reservations }, { status: 200 });
   }),

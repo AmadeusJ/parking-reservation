@@ -5,10 +5,22 @@
  */
 
 import { Button } from '@/components/UI/Button';
+import { ConfirmModal } from '@/components/UI/ConfirmModal';
 import { Text } from '@/components/UI/Text';
 import { colors } from '@/constants/colors';
-
+import useCancleReservationQuery from '@/hooks/query/useCancleReservationQuery';
+import { format } from 'date-fns';
+import { useState } from 'react';
 const ReservationInfo = ({ reservation }) => {
+  // 예약 취소 API 호출 함수
+  const { cancelReservation } = useCancleReservationQuery(reservation.id);
+  // 예약 취소 확인 모달 상태
+  const [open, setOpen] = useState(false);
+  // 예약 취소 버튼 클릭 시 확인 모달 열기
+  const handleCancelReservation = () => {
+    setOpen(true);
+  };
+
   return (
     // 예약 정보 컨테이너
     <div
@@ -37,11 +49,11 @@ const ReservationInfo = ({ reservation }) => {
       >
         {/* 주차장 이름 */}
         <Text fontSize="22px" fontWeight="bold" color="black">
-          {reservation.parkingName}
+          {`"${reservation.parkingLot}" 주차장`}
         </Text>
         {/* 주차면 번호 */}
         <Text fontSize="16px" fontWeight="bold" color="gray">
-          {reservation.parkingSlotId}
+          {`${reservation.parkingSlotId}번 자리`}
         </Text>
       </div>
 
@@ -57,7 +69,7 @@ const ReservationInfo = ({ reservation }) => {
         }}
       >
         <Text fontSize="16px" color="gray">
-          {reservation.reservationDate}
+          {`${format(reservation.created, 'yyyy-MM-dd HH:mm:ss')}`}
         </Text>
       </div>
 
@@ -71,13 +83,25 @@ const ReservationInfo = ({ reservation }) => {
           flex: 1,
         }}
       >
-        <Button width="100px" fontSize="18px">
-          변경
-        </Button>
-        <Button width="100px" fontSize="18px" btnColor="secondary">
-          취소
+        <Button
+          width="100px"
+          fontSize="18px"
+          btnColor="secondary"
+          onClick={handleCancelReservation}
+        >
+          {'취소'}
         </Button>
       </div>
+
+      {/* 예약 취소 확인 모달 */}
+      <ConfirmModal
+        open={open}
+        onConfirm={() => cancelReservation(reservation.parkingSlotId)}
+        description="예약을 취소하시겠어요?"
+        showCancelButton={true}
+        confirmButtonText="예약 취소"
+        onCancel={() => setOpen(false)}
+      />
     </div>
   );
 };

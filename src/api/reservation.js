@@ -47,10 +47,11 @@ const reservationApi = {
    * @param {number} parkingSlotId 예약할 주차장의 ID
    * @returns {Promise} 예약 생성 결과
    */
-  createReservation: async (parkingSlotId) => {
+  createReservation: async (parkingSlotId, userId) => {
     try {
       const response = await apiClient.post('/parking-reservation/create', {
         parkingSlotId,
+        userId,
       });
       return response.data;
     } catch (error) {
@@ -65,10 +66,10 @@ const reservationApi = {
    * @param {number} parkingSlotId 취소할 주차장의 ID
    * @returns {Promise} 예약 취소 결과
    */
-  cancelReservation: async (parkingSlotId) => {
+  cancelReservation: async (parkingSlotId, userId) => {
     try {
       const response = await apiClient.delete('/parking-reservation/cancel', {
-        data: { parkingSlotId },
+        data: { parkingSlotId, userId },
       });
       return response.data;
     } catch (error) {

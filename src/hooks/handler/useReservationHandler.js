@@ -4,9 +4,10 @@ import { useCallback, useState } from 'react';
  * 주차장 예약 처리 로직을 담당하는 커스텀 훅
  *
  * @param {Function} createReservation - 예약 생성 API 호출 함수
+ * @param {number} userId - 유저 아이디
  * @returns {Object} - 안내 문구와 버튼 상태를 관리하는 값과 함수
  */
-const useReservationHandler = (createReservation) => {
+const useReservationHandler = (createReservation, userId) => {
   const [resultMessage, setResultMessage] = useState('');
   const [isConfirmed, setIsConfirmed] = useState(false); // 확인 버튼만 보여질 상태
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
@@ -18,10 +19,9 @@ const useReservationHandler = (createReservation) => {
         setIsLoading(true); // 로딩 상태 변경
 
         // 예약 생성 API 호출
-        const response = await createReservation(slot.id);
-
+        const response = await createReservation(slot.id, userId);
         // 서버 응답 결과 처리
-        if (response.success) {
+        if (response.result) {
           setResultMessage(
             `예약을 완료했어요!<br/>${slot.id}번 자리를 확인하세요.`
           );
@@ -44,7 +44,7 @@ const useReservationHandler = (createReservation) => {
         setIsLoading(false); // 로딩 상태 초기화
       }
     },
-    [createReservation]
+    [createReservation, userId]
   );
 
   return {
