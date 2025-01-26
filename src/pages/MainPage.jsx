@@ -68,8 +68,21 @@ export default function MainPage() {
         marginTop: '50px',
       }}
     >
-      {/* 주차장 예약 페이지 - 안내 문구 */}
-      <GuideDesc.page01.EnableRservation />
+      {/* 주차장 예약 페이지 - 안내 문구 : 예약 가능 여부에 따라 문구 변경 */}
+      {/* 비점유면이 있으면서, 나의 "예약" 건이 있는 경우 */}
+      {statistics.hasReservation && (
+        <GuideDesc.page01.ExistReservation
+          parkingSlotId={statistics.mySlotId}
+        />
+      )}
+      {/* 비점유면이 있으면서, "예약" 건이 없는 경우 */}
+      {statistics.availableSlots > 0 && !statistics.hasReservation && (
+        <GuideDesc.page01.EnableRservation />
+      )}
+      {/* 비점유면이 없어 예약 불가 상태인 경우 */}
+      {statistics.availableSlots === 0 && (
+        <GuideDesc.page01.DisableRservation />
+      )}
 
       {/* 주차장 통계 컴포넌트 */}
       <ParkingStatistics statistics={statistics} />

@@ -10,6 +10,15 @@ const ParkingStatistics = ({ statistics }) => {
   const [availableColor, setAvailableColor] = useState(colors.gray);
   const { availableSlots, totalSlots, typeCounts } = statistics;
 
+  // 유형별 색상 설정
+  const typeColors = {
+    여성: 'female',
+    노약자: 'elderly',
+    장애인: 'disabled',
+    전기차: 'ev',
+    일반: 'gray',
+  };
+
   useEffect(() => {
     let availableColor = availableSlots > 0 ? 'unoccupied' : 'gray';
     setAvailableColor(availableColor);
@@ -49,11 +58,18 @@ const ParkingStatistics = ({ statistics }) => {
           alignItems: 'center',
         }}
       >
-        {Object.entries(typeCounts).map(([type, count], index) => (
-          <Text key={index} fontSize="16px" fontWeight="bold" color="gray">
-            {`${type}: ${count}`}
-          </Text>
-        ))}
+        {Object.entries(typeCounts).map(([type, count], index) => {
+          return (
+            <Text
+              key={index}
+              fontSize="16px"
+              highlight={[`${type}`]}
+              highlightColor={typeColors[type] || colors.gray}
+            >
+              {`${type}: ${count}`}
+            </Text>
+          );
+        })}
       </ul>
     </div>
   );

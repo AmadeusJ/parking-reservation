@@ -15,6 +15,7 @@ export default {
       availableSlots: 10,
       totalSlots: 20,
       typeCounts: { A: 5, B: 3, C: 2 },
+      typeColors: { A: 'red', B: 'blue', C: 'green' },
     },
   },
 };

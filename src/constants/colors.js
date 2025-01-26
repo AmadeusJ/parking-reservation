@@ -11,6 +11,11 @@ const gray = '#8f8d8d';
 const primary = '#eb008b';
 const secondary = '#b5b2b2';
 
+const female = '#D8538E';
+const elderly = '#0165C2';
+const disabled = '#0000ff';
+const ev = '#297355';
+
 // 주차장 상태 색상
 const unoccupied = '#00D841';
 // const unoccupied = '#B5B2B2';
@@ -33,4 +38,8 @@ export const colors = {
   unoccupied,
   reserved,
   occupied,
+  female,
+  elderly,
+  disabled,
+  ev,
 };
