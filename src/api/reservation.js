@@ -104,9 +104,11 @@ const reservationApi = {
    * @param {AbortSignal} signal 취소 가능한 요청 신호
    * @returns {Promise} 주차내역 데이터
    */
-  getMyReservation: async ({ signal }) => {
+  getMyReservation: async ({ signal, userId }) => {
     try {
-      const response = await apiClient.get('/my-reservation', { signal });
+      const response = await apiClient.get(`/my-reservation/${userId}`, {
+        signal,
+      });
       return response.data;
     } catch (error) {
       throw new Error(

@@ -212,8 +212,8 @@ export const handlers = [
   }),
 
   // 나의 주차내역 조회 API
-  http.get('/api/my-reservation', ({ url }) => {
-    const userId = parseInt(url.searchParams.get('userId'), 10);
+  http.get('/api/my-reservation/:userId', ({ params }) => {
+    const userId = parseInt(params.userId, 10);
     if (!userId) {
       return HttpResponse.json(
         { result: false, message: 'userId is required' },
@@ -225,9 +225,6 @@ export const handlers = [
       .getValue()
       .filter((reservation) => reservation.userId === userId);
 
-    return HttpResponse.json(
-      { 'my-parkingSlots': reservations },
-      { status: 200 }
-    );
+    return HttpResponse.json({ data: reservations }, { status: 200 });
   }),
 ];

@@ -21,6 +21,7 @@ const occupied = '#B5B2B2';
 export const btnColors = {
   primary: { base: primary, hover: '#c2006e', active: '#990059' },
   secondary: { base: secondary, hover: '#969494', active: '#737171' },
+  white: { base: white, hover: '#d0d0d0', active: '#e8e8e8' },
 };
 
 export const colors = {

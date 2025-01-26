@@ -70,18 +70,6 @@ export const useReservationQuery = () => {
     },
   });
 
-  // 나의 예약 목록 조회
-  const {
-    data: myReservations = [],
-    error: myReservationsError,
-    isError: isMyReservationsError,
-    isPending: isMyReservationsPending,
-  } = useQuery({
-    queryKey: ['myReservations'],
-    queryFn: ({ signal }) => reservationApi.getMyReservations({ signal }),
-    placeholderData: [], // 데이터를 가져오기 전 사용할 임시 값
-  });
-
   return {
     // 주차장 상태 조회
     parkingSlots,
@@ -106,11 +94,5 @@ export const useReservationQuery = () => {
     changeReservationError,
     isChangeReservationError,
     isChangeReservationPending,
-
-    // 나의 예약 목록 조회
-    myReservations,
-    myReservationsError,
-    isMyReservationsError,
-    isMyReservationsPending,
   };
 };
