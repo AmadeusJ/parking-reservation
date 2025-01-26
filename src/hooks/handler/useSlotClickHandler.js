@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
  * @param {Function} onNavigate - 다른 화면으로 이동하는 함수
  * @returns {Object} - 모달 상태 및 클릭 핸들러
  */
-const useSlotClickHandler = (onNavigate) => {
+export default function useSlotClickHandler(onNavigate) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [modalContent, setModalContent] = useState({
@@ -17,7 +17,7 @@ const useSlotClickHandler = (onNavigate) => {
 
   const typeWarnings = {
     점유: '이미 예약 중인 자리에요.<br/>다른 자리를 선택해 주세요.',
-    예약: '이미 회원님이 예약 중인 자리에요.',
+    예약: '회원님이 예약 중인 자리에요.<br/>예약을 취소 할까요?',
   };
   const typeSpecial = {
     전기차: '전기차 충전 목적으로만 사용을 부탁드려요.',
@@ -62,25 +62,33 @@ const useSlotClickHandler = (onNavigate) => {
       case '예약':
         setModalContent({
           description: typeWarnings['예약'],
-          showCancelButton: false,
-          confirmButtonText: '확인',
+          showCancelButton: true,
         });
         setIsModalOpen(true);
         break;
     }
   }, []);
 
+  // 모달 닫기
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedSlot(null);
     setModalContent(null);
   }, []);
 
+  // 확인 버튼 클릭 시 예약 처리
   const handleConfirm = useCallback(() => {
+    // 비점유 상태일 경우 예약 처리
     if (selectedSlot.status === '비점유') {
       onNavigate('/reservation', {
         state: { slot: selectedSlot, action: 'reserve' },
       });
+      // 예약 상태일 경우 예약 취소 처리
+    } else if (selectedSlot.status === '예약') {
+      onNavigate('/reservation', {
+        state: { slot: selectedSlot, action: 'cancel' },
+      });
+      // 점유 상태일 경우 모달 닫기
     } else {
       closeModal();
     }
@@ -94,6 +102,4 @@ const useSlotClickHandler = (onNavigate) => {
     closeModal,
     handleConfirm,
   };
-};
-
-export default useSlotClickHandler;
+}

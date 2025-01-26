@@ -10,12 +10,13 @@ import reservationApi, { queryClient } from '../../api/reservation';
  * @param {parkingSlotId} - 예약 취소할 주차장 슬롯 ID
  * @returns {Object} - 예약 취소 함수, 예약 취소 상태, 예약 취소 오류 상태, 예약 취소 오류
  */
-export const useCancleReservationQuery = () => {
+export default function useCancleReservationQuery() {
   const {
     mutate: cancelReservation,
     isPending: isCancelingReservation,
     isError: isCancelingReservationError,
     error: cancelReservationError,
+    isSuccess: isCancelingReservationSuccess,
   } = useMutation({
     mutationFn: (parkingSlotId) =>
       reservationApi.cancelReservation(parkingSlotId),
@@ -30,8 +31,9 @@ export const useCancleReservationQuery = () => {
 
   return {
     cancelReservation,
+    cancelReservationError,
     isCancelingReservation,
     isCancelingReservationError,
-    cancelReservationError,
+    isCancelingReservationSuccess,
   };
-};
+}
