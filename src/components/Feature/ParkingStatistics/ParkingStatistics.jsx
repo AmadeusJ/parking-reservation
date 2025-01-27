@@ -16,7 +16,7 @@ const ParkingStatistics = ({ statistics }) => {
     노약자: 'elderly',
     장애인: 'disabled',
     전기차: 'ev',
-    일반: 'gray',
+    일반: 'black',
   };
 
   useEffect(() => {

@@ -24,7 +24,7 @@ function RootLayout() {
           <Header.Logo />
         </Link>
         <Button btnColor="white" onClick={() => navigate('/my')} width="200px">
-          <Text>{`${user.name} 님의 예약`}</Text>
+          <Text>{`${user.name}님의 예약`}</Text>
         </Button>
       </Header>
       <section
