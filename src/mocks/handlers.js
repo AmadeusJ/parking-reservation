@@ -79,6 +79,8 @@ const initializeStorages = () => {
 };
 
 // 앱 시작 시 실행
+// NOTE: 새로고침 시 초기화 되도록 함
+// - 새로고침 시 초기화 원하지 않으면 주석 처리하세요.
 initializeStorages();
 
 // 공통 검증 함수
