@@ -48,6 +48,7 @@ export default function useParkingLotMapHandler(
       // SVG 요소 가져오기
       const svgElement = svgContainerRef.current.querySelector('svg');
       if (svgElement) {
+        const eventListeners = [];
         // 각 슬롯 데이터를 기반으로 스타일 및 이벤트 적용
         slotStyles.forEach(({ id, fillColor, type }) => {
           // 슬롯을 식별할 수 있는 <g> 요소 찾기
@@ -83,6 +84,7 @@ export default function useParkingLotMapHandler(
               }
             };
             group.addEventListener('click', handleClick);
+            eventListeners.push({ group, handleClick });
 
             // 슬롯 타입별 아이콘 추가
             if (typeIcons && typeIcons[type]) {
@@ -107,20 +109,21 @@ export default function useParkingLotMapHandler(
                 group.appendChild(imageElement); // 그룹에 아이콘 추가
               }
             }
-
-            // 컴포넌트 언마운트 시 이벤트 리스너 제거
-            return () => {
-              group.removeEventListener('click', handleClick);
-            };
           } else {
             // <g> 요소를 찾을 수 없는 경우 경고 메시지 출력
             console.warn(`No group found for slot id: ${id}`);
           }
         });
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        return () => {
+          eventListeners.forEach(({ group, handleClick }) =>
+            group.removeEventListener('click', handleClick)
+          );
+        };
       } else {
         // SVG 요소를 찾을 수 없는 경우 경고 메시지 출력
         console.warn('SVG element not found in the container.');
       }
     }
-  }, [svgContainerRef, parkingSlots, slotStyles, onSlotClick]); // 의존성 배열
+  }, [svgContainerRef, slotStyles]); // 의존성 배열
 }

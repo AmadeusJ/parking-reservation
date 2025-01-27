@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 /**
  * 슬롯 클릭 이벤트를 처리하는 커스텀 훅
  *
@@ -15,59 +15,67 @@ export default function useSlotClickHandler(onNavigate) {
     confirmButtonText: null,
   });
 
-  const typeWarnings = {
-    점유: '이미 예약 중인 자리에요.<br/>다른 자리를 선택해 주세요.',
-    예약: '회원님이 예약 중인 자리에요.<br/>예약을 취소 할까요?',
-  };
-  const typeSpecial = {
-    전기차: '전기차 충전 목적으로만 사용을 부탁드려요.',
-    여성: '해당 이용 대상이 아닌 경우 자리를 양보해 주세요.',
-    노약자: '해당 이용 대상이 아닌 경우 자리를 양보해 주세요.',
-    장애인: '허가 없이 이용할 경우 법적 책임이 있어요.',
-  };
+  const typeWarnings = useMemo(() => {
+    return {
+      점유: '이미 예약 중인 자리에요.<br/>다른 자리를 선택해 주세요.',
+      예약: '회원님이 예약 중인 자리에요.<br/>예약을 취소 할까요?',
+    };
+  }, []);
 
-  const handleSlotClick = useCallback((slot) => {
-    // 선택된 슬롯 정보 저장
-    setSelectedSlot(slot);
+  const typeSpecial = useMemo(() => {
+    return {
+      전기차: '전기차 충전 목적으로만 사용을 부탁드려요.',
+      여성: '해당 이용 대상이 아닌 경우 자리를 양보해 주세요.',
+      노약자: '해당 이용 대상이 아닌 경우 자리를 양보해 주세요.',
+      장애인: '허가 없이 이용할 경우 법적 책임이 있어요.',
+    };
+  }, []);
 
-    switch (slot.status) {
-      // 점유 상태일 경우
-      case '점유':
-        setModalContent({
-          description: typeWarnings['점유'],
-          showCancelButton: false,
-          confirmButtonText: '확인',
-        });
-        setIsModalOpen(true);
-        break;
+  const handleSlotClick = useCallback(
+    (slot) => {
+      // 선택된 슬롯 정보 저장
+      setSelectedSlot(slot);
 
-      // 비점유 상태일 경우
-      case '비점유':
-        if (typeSpecial[slot.type]) {
+      switch (slot.status) {
+        // 점유 상태일 경우
+        case '점유':
           setModalContent({
-            description: `${slot.type} 자리에요!<br/>예약을 진행할까요?`,
-            subDescription: typeSpecial[slot.type],
-            showCancelButton: true,
-            confirmButtonText: '예약하기',
+            description: typeWarnings['점유'],
+            showCancelButton: false,
+            confirmButtonText: '확인',
           });
           setIsModalOpen(true);
-        } else {
-          onNavigate('/reservation', {
-            state: { slot: slot, action: 'reserve' },
-          });
-        }
-        break;
+          break;
 
-      // 예약 상태일 경우
-      case '예약':
-        setModalContent({
-          description: typeWarnings['예약'],
-          showCancelButton: true,
-        });
-        setIsModalOpen(true);
-        break;
-    }
-  }, []);
+        // 비점유 상태일 경우
+        case '비점유':
+          if (typeSpecial[slot.type]) {
+            setModalContent({
+              description: `${slot.type}번 자리에요!<br/>예약을 진행할까요?`,
+              subDescription: typeSpecial[slot.type],
+              showCancelButton: true,
+              confirmButtonText: '예약하기',
+            });
+            setIsModalOpen(true);
+          } else {
+            onNavigate('/reservation', {
+              state: { slot: slot, action: 'reserve' },
+            });
+          }
+          break;
+
+        // 예약 상태일 경우
+        case '예약':
+          setModalContent({
+            description: typeWarnings['예약'],
+            showCancelButton: true,
+          });
+          setIsModalOpen(true);
+          break;
+      }
+    },
+    [typeWarnings, typeSpecial, onNavigate]
+  );
 
   // 모달 닫기
   const closeModal = useCallback(() => {
@@ -92,7 +100,7 @@ export default function useSlotClickHandler(onNavigate) {
     } else {
       closeModal();
     }
-  }, [selectedSlot]);
+  }, [selectedSlot, onNavigate, closeModal]);
 
   return {
     handleSlotClick,
