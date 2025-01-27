@@ -5,7 +5,6 @@
  */
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GuideDesc from '../components/Feature/GuideDescription';
 import ParkingLotMap from '../components/Feature/ParkingLotMap'; // 주차도면 SVG 컴포넌트
 import { ParkingStatistics } from '../components/Feature/ParkingStatistics';
 import { ConfirmModal } from '../components/UI/ConfirmModal';
@@ -16,7 +15,7 @@ import useParkingLotMapHandler from '../hooks/handler/useParkingLotMapHandler';
 import useParkingStatisticsHandler from '../hooks/handler/useParkingStatisticsHandler';
 import useSlotClickHandler from '../hooks/handler/useSlotClickHandler';
 import useGetParkingLotQuery from '../hooks/query/useGetParkingLotQuery';
-
+import getGuideMessage from '../utils/getGuideMessage';
 export default function MainPage() {
   const navigate = useNavigate();
 
@@ -46,6 +45,9 @@ export default function MainPage() {
   // 주차장 통계 정보 계산
   const statistics = useParkingStatisticsHandler(parkingSlots);
 
+  // 주차장 예약 페이지 안내문구 생성
+  const guideMessage = getGuideMessage(statistics);
+
   // 주차장 상태 조회 로딩 중일 때 스피너 표시
   if (isParkingSlotsPending) {
     return <Spinner isLoading={isParkingSlotsPending} />;
@@ -69,20 +71,14 @@ export default function MainPage() {
       }}
     >
       {/* 주차장 예약 페이지 - 안내 문구 : 예약 가능 여부에 따라 문구 변경 */}
-      {/* 비점유면이 있으면서, 나의 "예약" 건이 있는 경우 */}
-      {statistics.hasReservation && (
-        <GuideDesc.page01.ExistReservation
-          parkingSlotId={statistics.mySlotId}
-        />
-      )}
-      {/* 비점유면이 있으면서, "예약" 건이 없는 경우 */}
-      {statistics.availableSlots > 0 && !statistics.hasReservation && (
-        <GuideDesc.page01.EnableRservation />
-      )}
-      {/* 비점유면이 없어 예약 불가 상태인 경우 */}
-      {statistics.availableSlots === 0 && (
-        <GuideDesc.page01.DisableRservation />
-      )}
+      <Text
+        fontSize="35px"
+        fontWeight="bold"
+        color="black"
+        highlight={['가능', '예약 중', '어려워요']}
+      >
+        {guideMessage}
+      </Text>
 
       {/* 주차장 통계 컴포넌트 */}
       <ParkingStatistics statistics={statistics} />
